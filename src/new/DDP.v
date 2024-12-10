@@ -59,4 +59,10 @@ always @(posedge pclk) begin           //可能慢一个周期，改hen,ven即�
     end
     else rgb<=0;
 end
+blk_mem_gen_0 ram(
+    .clka(pclk),    
+    .ena(1),     
+    .addra(raddr), 
+    .douta(rdata)  
+);
 endmodule

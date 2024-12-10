@@ -77,7 +77,6 @@ CntS #(16,VSW_t) vcnt(          //每行扫描完计数器增加1，表示扫描
 
     .q          (q_v)
 );
-
 always @(*) begin
     case (h_state)   
         SW: begin
