@@ -16,7 +16,10 @@ DST dst(
     .hs(VGA_HS),
     .vs(VGA_VS)
 );
-/*DDP ddp(
+/*TODO：这里的例化具体关系还没搞清楚，rdata是上个像素的rgb数据，
+        这个部分相当于输入上个周期得到的rbg并显示，然后输出这个周期的rgb用于下个周期显示？
+        这部分逻辑有点混乱，晚上再看
+DDP ddp(
                hen,
                ven,
                rstn,
