@@ -1,32 +1,43 @@
-module DST_TOP (
+module TOP (
     input                   [ 0 : 0]            rstn,
     input                   [ 0 : 0]            clk,
 
-    output                  [ 0 : 0]            VGA_HS,         //行同步
-    output                  [ 0 : 0]            VGA_VS          //场同步
+    output                  [ 0 : 0]            VGA_HS,         //行同�?
+    output                  [ 0 : 0]            VGA_VS,          //场同�?
+    output                  [11 : 0]            rgb
 );
 wire [0:0] pclk;
-clk_wiz_0 clk_init(
-    .clk_in1(clk),
-    .clk_out1(pclk)
+wire [0:0] hen;
+wire [0:0] ven;
+wire [14:0] raddr=0;
+wire [11:0] rdata;
+clk_wiz_0 instance_name (
+    .clk_out1(pclk),
+    .reset(1'b0),
+    .clk_in1(clk)
 );
 DST dst(
     .rstn(rstn),
     .pclk(pclk),
     .hs(VGA_HS),
-    .vs(VGA_VS)
+    .vs(VGA_VS),
+    .hen(hen),
+    .ven(ven)
 );
-/*TODO：这里的例化具体关系还没搞清楚，rdata是上个像素的rgb数据，
-        这个部分相当于输入上个周期得到的rbg并显示，然后输出这个周期的rgb用于下个周期显示？
-        这部分逻辑有点混乱，晚上再看
 DDP ddp(
-               hen,
-               ven,
-               rstn,
-               pclk,
-  [11:0]       rdata,
-
-[11:0]   rgb,
-[DW-1:0] raddr
-)*/
+    .hen(hen),        
+    .ven(ven),        
+    .rstn(rstn),
+    .rdata(rdata),
+    .pclk(pclk),
+    .raddr(raddr),
+    .rgb(rgb)  
+);
+blk_mem_gen_0 your_instance_name (
+  .clka(pclk),   
+  .ena(1'b1),    
+  .wea(1'b0),    
+  .addra(raddr), 
+  .douta(rdata)  
+);
 endmodule

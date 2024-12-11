@@ -73,12 +73,13 @@ CntS #(16,VSW_t) vcnt(          //每行扫描完计数器增加1，表示扫描
     .clk        (pclk),
     .rstn       (rstn),
     .d          (d_v),
-    .ce         (1'b1),
+    .ce         (ce_v),
 
     .q          (q_v)
 );
+
 always @(*) begin
-    case (h_state)   
+    case (h_state)
         SW: begin
             d_h = HBP_t;  hs = 1; hen = 0;
         end
