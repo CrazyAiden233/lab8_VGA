@@ -4,27 +4,28 @@ module DDP#(
         parameter DW = 15,
         parameter H_LEN = 200,
         parameter V_LEN = 150,
-        parameter H_LEN_player = 15,
+        parameter H_LEN_player = 30,
         parameter V_LEN_player = 30,
         parameter H_LEN_enemy = 30,
         parameter V_LEN_enemy = 30,
-        parameter H_LEN_bullet = 33,
-        parameter V_LEN_bullet = 30
+        parameter H_LEN_bullet = 15,
+        parameter V_LEN_bullet = 15
     )(
     input               hen,
     input               ven,
     input               rstn,
     input               pclk,
-    input  [11:0]       rdata_background,
-    input  [11:0]       rdata_player,
-    input  [11:0]       rdata_enemy,
-    input  [11:0]       rdata_bullet,
-    input  [8:0]        start_player_x,
-    input  [8:0]        start_player_y,
-    input  [8:0]        start_enemy_x,
-    input  [8:0]        start_enemy_y,
-    input  [8:0]        start_bullet_x,
-    input  [8:0]        start_bullet_y,
+    input   [11:0]       rdata_background,
+    input   [11:0]       rdata_player,
+    input   [11:0]       rdata_enemy,
+    input   [11:0]       rdata_bullet,
+    input   [8:0]        start_player_x,
+    input   [8:0]        start_player_y,
+    input   [8:0]        start_enemy_x,
+    input   [8:0]        start_enemy_y,
+    input   [8:0]        start_bullet_x,
+    input   [8:0]        start_bullet_y,
+    input                exist_bullet,
     
     output reg [11:0]   rgb,
     output reg [DW-1:0] raddr_background,
@@ -53,7 +54,7 @@ module DDP#(
         .p      (p)
     );
 
-   always @(posedge pclk) begin
+    always @(posedge pclk) begin
         if ((raddr_background / H_LEN) >= start_player_x && (raddr_background / H_LEN) < start_player_x + V_LEN_player && (raddr_background - (raddr_background / H_LEN) * H_LEN) >= start_player_y && (raddr_background - (raddr_background / H_LEN) * H_LEN) < start_player_y + H_LEN_player) begin
             out_player <= 1;
             raddr_player <= ((raddr_background / H_LEN) - start_player_x) * H_LEN_player + ((raddr_background - (raddr_background / H_LEN) * H_LEN) - start_player_y);
@@ -68,7 +69,7 @@ module DDP#(
             out_enemy <= 0;
             raddr_enemy <= 0;
         end 
-        if ((raddr_background / H_LEN) >= start_bullet_x && (raddr_background / H_LEN) < start_bullet_x + V_LEN_bullet && (raddr_background - (raddr_background / H_LEN) * H_LEN) >= start_bullet_y && (raddr_background - (raddr_background / H_LEN) * H_LEN) < start_bullet_y + H_LEN_bullet) begin
+        if (exist_bullet && (raddr_background / H_LEN) >= start_bullet_x && (raddr_background / H_LEN) < start_bullet_x + V_LEN_bullet && (raddr_background - (raddr_background / H_LEN) * H_LEN) >= start_bullet_y && (raddr_background - (raddr_background / H_LEN) * H_LEN) < start_bullet_y + H_LEN_bullet) begin
             out_bullet <= 1;
             raddr_bullet <= ((raddr_background / H_LEN) - start_bullet_x) * H_LEN_bullet + ((raddr_background - (raddr_background / H_LEN) * H_LEN) - start_bullet_y);
         end else begin
@@ -86,14 +87,14 @@ module DDP#(
             if (out_bullet && rdata_bullet != 12'h0F0) rgb <= rdata_bullet;
             else if (out_enemy && rdata_enemy != 12'h0F0) rgb <= rdata_enemy;
             else if (out_player && rdata_player != 12'h0F0) rgb <= rdata_player;
-            else rgb <= 12'h9FF;
+            else rgb <= rdata_background;
             if(sx == 2'b11) begin
                 raddr_background <= raddr_background + 1;
             end
             nsx <= sx + 1;
         end                                      //??��????
         else if(p) begin                        //ven?????
-            rgb <= 0;
+            rgb <= 0;      
             if(sy != 2'b11) begin
                 raddr_background <= raddr_background - H_LEN;
             end

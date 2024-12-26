@@ -11,14 +11,9 @@ module keyboard(
     output reg        TXD,
     output reg        CTS,
     input             RTS,
-    output reg        bt_up,
-    output reg        bt_down,
-    output reg        bt_left,
-    output reg        bt_right,
     output reg        bt_W,
     output reg        bt_S,
-    output reg        bt_A,
-    output reg        bt_D
+    output reg        bt_J
 );
 
 // USB ports control
@@ -35,6 +30,7 @@ assign USB_DATA_in = USB_DATA;
 
 wire       PS2_valid;
 wire [7:0] PS2_data_in;
+reg  [7:0] PS2_data_in_;
 wire       PS2_busy;
 wire       PS2_error;
 wire       PS2_complete;
@@ -177,14 +173,6 @@ always @(posedge clk or posedge rst) begin
             rx_start <= 1'b0;
             rx_bit_count <= 4'd0;
             PS2_enable <= 1'b1;
-            case(RXD_delay[7:0])
-            8'b00001100: begin PS2_data_out <= 8'hFF; end // Reset
-            8'b10001100: begin PS2_data_out <= 8'hED; end // Set status LED
-            8'b01001100: begin PS2_data_out <= 8'h07; end // LED byte
-            8'b11001100: begin PS2_data_out <= 8'hEE; end // Echo
-            8'b00101100: begin PS2_data_out <= 8'hFE; end // Resend
-            default: begin PS2_data_out <= 8'hEE; end
-            endcase
         end
         else begin
             PS2_enable <= 1'b0;
@@ -193,26 +181,16 @@ always @(posedge clk or posedge rst) begin
 end
 
 always @(posedge clk) begin
-    if(rst) begin
-        bt_up <= 1'b0;
-        bt_down <= 1'b0;
-        bt_left <= 1'b0;
-        bt_right <= 1'b0;
+    if(!PS2_valid) begin
         bt_W <= 1'b0;
         bt_S <= 1'b0;
-        bt_A <= 1'b0;
-        bt_D <= 1'b0;
+        bt_J <= 1'b0;
     end
     else if(PS2_valid) begin 
-        bt_up <= (PS2_data_in == 8'h75) ? 1'b1 : 1'b0;
-        bt_down <= (PS2_data_in == 8'h72) ? 1'b1 : 1'b0;
-        bt_left <= (PS2_data_in == 8'h6B) ? 1'b1 : 1'b0;
-        bt_right <= (PS2_data_in == 8'h74) ? 1'b1 : 1'b0;
-        bt_W <= (PS2_data_in == 8'h1D) ? 1'b1 : 1'b0;
-        bt_S <= (PS2_data_in == 8'h1B) ? 1'b1 : 1'b0;
-        bt_A <= (PS2_data_in == 8'h1C) ? 1'b1 : 1'b0;
-        bt_D <= (PS2_data_in == 8'h23) ? 1'b1 : 1'b0;
-
+        PS2_data_in_ <= PS2_data_in;
+        bt_W <= (PS2_data_in == 8'h1D && PS2_data_in_ == 8'hF0) ? 1'b1 : 1'b0;
+        bt_S <= (PS2_data_in == 8'h1B && PS2_data_in_ == 8'hF0) ? 1'b1 : 1'b0;
+        bt_J <= (PS2_data_in == 8'h3B && PS2_data_in_ == 8'hF0) ? 1'b1 : 1'b0;
     end
 end
 endmodule

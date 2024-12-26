@@ -17,8 +17,8 @@ wire [0:0] pclk;
 wire [0:0] hen;
 wire [0:0] ven;
 wire [14:0] raddr_player, raddr_enemy, raddr_bullet, raddr_background;
-wire [11:0] rdata_player, rdata_enemy, rdtata_bullet, rdata_background;
-reg [8:0] start_player_x, start_player_y, start_enemy_x, start_enemy_y, start_bullet_x, start_bullet_y;
+wire [11:0] rdata_player, rdata_enemy, rdata_bullet, rdata_background;
+wire [8:0] start_player_x, start_player_y, start_enemy_x, start_enemy_y, start_bullet_x, start_bullet_y, bt_W, bt_S, bt_J, exist_bullet;
 
 clk_wiz_0 instance_name (
     .clk_out1(pclk),
@@ -33,6 +33,13 @@ DST dst(
     .vs(VGA_VS),
     .hen(hen),
     .ven(ven)
+);
+blk_mem_gen_0 background (
+  .clka(pclk),   
+  .ena(1'b1),    
+  .wea(1'b0),    
+  .addra(raddr_background), 
+  .douta(rdata_background)  
 );
 
 blk_mem_gen_1 player (
@@ -50,11 +57,12 @@ blk_mem_gen_2 enemy (
   .addra(raddr_enemy), 
   .douta(rdata_enemy)  
 );
-dist_mem_gen_0 bullet (
-  .clk(pclk),   
-  .we(1'b0),    
-  .a(raddr_bullet), 
-  .spo(rdata_bullet)  
+blk_mem_gen_3 bullet (
+  .clka(pclk),   
+  .ena(1'b1),    
+  .wea(1'b0),    
+  .addra(raddr_bullet), 
+  .douta(rdata_bullet)  
 );
 
 DDP ddp(
@@ -70,13 +78,14 @@ DDP ddp(
     .raddr_player(raddr_player),
     .raddr_enemy(raddr_enemy),
     .raddr_bullet(raddr_bullet),
-    .start_player_x(0),
-    .start_player_y(0),
-    .start_enemy_x(0),
-    .start_enemy_y(100),
-    .start_bullet_x(0),
-    .start_bullet_y(60),
-    .rgb(rgb)  
+    .start_player_x(start_player_x),
+    .start_player_y(start_player_y),
+    .start_enemy_x(start_enemy_x),
+    .start_enemy_y(start_enemy_y),
+    .start_bullet_x(start_bullet_x),
+    .start_bullet_y(start_bullet_y),
+    .rgb(rgb),
+    .exist_bullet(exist_bullet)  
 );
 
 keyboard keyboard0(
@@ -87,6 +96,24 @@ keyboard keyboard0(
     .RXD(UART_RXD_OUT),
     .TXD(UART_TXD_IN),
     .CTS(UART_CTS),
-    .RTS(UART_RTS)
+    .RTS(UART_RTS),
+    .bt_W(bt_W),
+    .bt_S(bt_S),
+    .bt_J(bt_J)
+);
+
+Move move(
+    .clk(pclk),
+    .rstn(rstn),
+    .start_player_x(start_player_x),
+    .start_player_y(start_player_y),
+    .start_enemy_x(start_enemy_x),
+    .start_enemy_y(start_enemy_y),
+    .start_bullet_x(start_bullet_x),
+    .start_bullet_y(start_bullet_y),
+    .bt_W(bt_W),
+    .bt_S(bt_S),
+    .bt_J(bt_J),
+    .exist_bullet(exist_bullet)
 );
 endmodule
