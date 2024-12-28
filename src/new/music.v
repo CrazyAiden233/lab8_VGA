@@ -1,32 +1,24 @@
 module music  (
 input              clk  ,
 input              rst_n,
+input [3:0]	   music_data,
 
+output reg     [9:0]      cnt2,
 output             beep
 );
 reg     [16:0]     cnt0    ;
 wire               add_cnt0;
 wire               end_cnt0;
-
-reg     [7:0]      cnt1    ;
-wire               add_cnt1;
-wire               end_cnt1;
-
-reg     [5:0]      cnt2    ;
-wire               add_cnt2;
-wire               end_cnt2;
-
 reg     [16:0]     pre_set ;
+reg     [31:0]	   counter = 32'b0;
 
-localparam  M1=95602,           //Òô·ûdo
-	        M2=85178,           //Òô·ûre
-	        M3=75872,           //Òô·ûmi
-	        M4=71633,           //Òô·ûfa
-	        M5=63775,           //Òô·ûso
-	        M6=56818,           //Òô·ûla
-	        M7=50607;           //Òô·ûxi
-
-localparam  D5=127551;         //Òô·ûso,µÍÒô
+localparam  M1=95602,          
+	        M2=85178,          
+	        M3=75872,          
+	        M4=71633,          
+	        M5=63775,          
+	        M6=56818,          
+	        M7=50607;        
 always @(posedge clk or negedge rst_n)begin
     if(!rst_n)begin
         cnt0<=0;
@@ -41,73 +33,32 @@ end
 assign add_cnt0=1'b1;
 assign end_cnt0=add_cnt0 && cnt0==pre_set-1;
 assign beep=(cnt0>=(pre_set/2))?1:0;
-
-always @(posedge clk or negedge rst_n)begin
+always @(posedge clk)begin
     if(!rst_n)begin
-        cnt1<=0;
-    end
-    else if(add_cnt1)begin
-        if(end_cnt1)
-            cnt1<=0;
-        else
-            cnt1<=cnt1+1; 
-    end
-end
-assign add_cnt1=end_cnt0;
-assign end_cnt1=add_cnt1 && cnt1==256-1;
-always @(posedge clk or negedge rst_n)begin
-    if(!rst_n)begin
-        cnt2<=0;  
-    end
-    else if(add_cnt2)begin
-        if(end_cnt2)
-            cnt2<=0;   
-        else 
-            cnt2<=cnt2+1;
-    end
-end
-assign add_cnt2=end_cnt1;
-assign end_cnt2=add_cnt2 && cnt2==32-1;
-always @(posedge clk or negedge rst_n)begin
-    if(!rst_n)begin
-        pre_set<=0;  
+        pre_set<=0; 
+		cnt2 <= 0; 
     end
     else begin
-       case(cnt2)
-                0:pre_set<=M1;
-				1:pre_set<=M2;
-				2:pre_set<=M3;
-				3:pre_set<=M1;
-				4:pre_set<=M1;
-				5:pre_set<=M2;
-				6:pre_set<=M3;
-				7:pre_set<=M1;
-				8:pre_set<=M3;
-				9:pre_set<=M4;
-				10:pre_set<=M5;
-				11:pre_set<=M3;
-				12:pre_set<=M4;
-				13:pre_set<=M5;
-				14:pre_set<=M5;
-				15:pre_set<=M6;
-				16:pre_set<=M5;
-				17:pre_set<=M4;
-				18:pre_set<=M3;
-				19:pre_set<=M1;
-				20:pre_set<=M5;
-				21:pre_set<=M6;
-				22:pre_set<=M5;
-				23:pre_set<=M4;
-				24:pre_set<=M3;
-				25:pre_set<=M1;
-				26:pre_set<=M2;
-				27:pre_set<=D5;
-				28:pre_set<=M1;
-				29:pre_set<=M2;
-				30:pre_set<=D5;
-				31:pre_set<=M1;
+       case(music_data)
+                1:pre_set<=M1;
+				2:pre_set<=M2;
+				3:pre_set<=M3;
+				4:pre_set<=M4;
+				5:pre_set<=M5;
+				6:pre_set<=M6;
+				7:pre_set<=M7;
 				default:pre_set<=0;
         endcase
+		
+	if (counter >= 32'd15000000) begin
+            counter <= 32'd0;
+			if (cnt2 <= 223)
+            cnt2 <= cnt2 + 1;
+			else
+			cnt2 <= 0;
+    end else begin
+            counter <= counter + 32'd1;
+    end
     end
 end
 endmodule

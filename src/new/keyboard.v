@@ -13,7 +13,8 @@ module keyboard(
     input             RTS,
     output reg        bt_W,
     output reg        bt_S,
-    output reg        bt_J
+    output reg        bt_J,
+    output reg        bt_SPACE
 );
 
 // USB ports control
@@ -191,6 +192,7 @@ always @(posedge clk) begin
         bt_W <= (PS2_data_in == 8'h1D && PS2_data_in_ == 8'hF0) ? 1'b1 : 1'b0;
         bt_S <= (PS2_data_in == 8'h1B && PS2_data_in_ == 8'hF0) ? 1'b1 : 1'b0;
         bt_J <= (PS2_data_in == 8'h3B && PS2_data_in_ == 8'hF0) ? 1'b1 : 1'b0;
+        bt_SPACE <= (PS2_data_in == 8'h29 && PS2_data_in_ == 8'hF0) ? 1'b1 : 1'b0;
     end
 end
 endmodule
